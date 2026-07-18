@@ -1,13 +1,8 @@
-use std::sync::Arc;
-
-use arc_swap::ArcSwap;
 use muda::AboutDialog;
 
 use super::tray::Tray;
 
-pub fn muda_to_ksni_menu_item(
-    item: Arc<ArcSwap<muda::CompatMenuItem>>,
-) -> ksni::menu::MenuItem<Tray> {
+pub fn muda_to_ksni_menu_item(item: muda::CompatMenuItemHandle) -> ksni::menu::MenuItem<Tray> {
     match &**item.load() {
         muda::CompatMenuItem::Standard(menu_item) => {
             let id = menu_item.id.clone();
@@ -64,6 +59,7 @@ pub fn muda_to_ksni_menu_item(
             enabled: submenu.enabled,
             submenu: submenu
                 .submenu
+                .load()
                 .iter()
                 .cloned()
                 .map(muda_to_ksni_menu_item)
@@ -79,4 +75,50 @@ fn send_menu_event(id: &str) {
     muda::MenuEvent::send(muda::MenuEvent {
         id: muda::MenuId(id.to_string()),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use arc_swap::ArcSwap;
+
+    use super::*;
+
+    fn standard(label: &str) -> muda::CompatMenuItemHandle {
+        Arc::new(ArcSwap::from_pointee(muda::CompatMenuItem::Standard(
+            muda::CompatStandardItem {
+                id: label.to_string(),
+                label: label.to_string(),
+                enabled: true,
+                icon: None,
+                predefined_item_id: None,
+                about_metadata: None,
+            },
+        )))
+    }
+
+    #[test]
+    fn maps_nested_submenu_children() {
+        let nested: muda::CompatMenuChildrenHandle = Arc::new(ArcSwap::from_pointee(vec![
+            standard("one"),
+            standard("two"),
+            standard("three"),
+        ]));
+        let submenu = Arc::new(ArcSwap::from_pointee(muda::CompatMenuItem::SubMenu(
+            muda::CompatSubMenuItem {
+                label: "parent".to_string(),
+                enabled: true,
+                submenu: nested,
+            },
+        )));
+
+        match muda_to_ksni_menu_item(submenu) {
+            ksni::menu::MenuItem::SubMenu(sub) => {
+                assert_eq!(sub.label, "parent");
+                assert_eq!(sub.submenu.len(), 3);
+            }
+            _ => panic!("expected a ksni SubMenu"),
+        }
+    }
 }

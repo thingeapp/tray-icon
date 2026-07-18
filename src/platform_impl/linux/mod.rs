@@ -6,10 +6,9 @@ mod icon;
 mod menu;
 mod tray;
 
-use std::{
-    sync::{atomic::AtomicBool, Arc},
-    thread,
-};
+use std::{sync::Arc, thread};
+
+use arc_swap::ArcSwap;
 
 pub(crate) use icon::PlatformIcon;
 use tray::Tray;
@@ -18,7 +17,11 @@ use crate::{icon::Icon, TrayIconAttributes, TrayIconId};
 
 pub struct TrayIcon {
     tray_handle: ksni::Handle<Tray>,
-    shutdown: Arc<AtomicBool>,
+    update_subscription: u64,
+}
+
+fn empty_menu_handle() -> muda::CompatMenuChildrenHandle {
+    Arc::new(ArcSwap::from_pointee(Vec::new()))
 }
 
 impl TrayIcon {
@@ -31,28 +34,26 @@ impl TrayIcon {
             .menu
             .as_ref()
             .map(|menu| menu.compat_items())
-            .unwrap_or_default();
-
-        let shutdown = Arc::new(AtomicBool::new(false));
+            .unwrap_or_else(empty_menu_handle);
 
         let tray_service = ksni::TrayService::new(Tray::new(id, icon, title, tooltip, menu));
         let tray_handle = tray_service.handle();
         tray_service.spawn();
 
+        // Each tray gets its own subscription, so update wake-ups are never
+        // stolen by another tray. The thread exits when the subscription is
+        // dropped (recv returns Err once the sender is unregistered).
+        let (update_subscription, update_receiver) = muda::subscribe_menu_update();
         let update_tray_handle = tray_handle.clone();
-        let update_shutdown = shutdown.clone();
         thread::spawn(move || {
-            while muda::recv_menu_update().is_ok() {
-                if update_shutdown.load(std::sync::atomic::Ordering::Relaxed) {
-                    break;
-                }
+            while update_receiver.recv().is_ok() {
                 update_tray_handle.update(|_| {});
             }
         });
 
         Ok(Self {
             tray_handle,
-            shutdown,
+            update_subscription,
         })
     }
 
@@ -70,7 +71,7 @@ impl TrayIcon {
         let menu = menu
             .as_ref()
             .map(|menu| menu.compat_items())
-            .unwrap_or_default();
+            .unwrap_or_else(empty_menu_handle);
 
         self.tray_handle.update(|tray| {
             tray.set_menu(menu);
@@ -122,8 +123,8 @@ impl TrayIcon {
 
 impl Drop for TrayIcon {
     fn drop(&mut self) {
-        self.shutdown
-            .store(true, std::sync::atomic::Ordering::Relaxed);
-        muda::send_menu_update();
+        // Unregistering drops this tray's update sender, which disconnects the
+        // receiver and lets the update thread exit.
+        muda::unsubscribe_menu_update(self.update_subscription);
     }
 }
