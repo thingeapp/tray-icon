@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: feat/gtk4
+          ref: gtk4/webkit6
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -34,7 +34,7 @@ jobs:
             echo "Found $BEHIND new commits from upstream"
             if git merge upstream/dev --no-edit; then
               echo "Successfully merged upstream changes"
-              git push origin feat/gtk4
+              git push origin gtk4/webkit6
             else
               echo "Merge conflicts detected - manual intervention required"
               git merge --abort
