@@ -1,5 +1,39 @@
 # Changelog
 
+## \[0.24.1]
+
+- [`7adc007`](https://www.github.com/tauri-apps/tray-icon/commit/7adc007bb54a91e7e6de4baac87ae534e1aa0550) ([#325](https://www.github.com/tauri-apps/tray-icon/pull/325) by [@Y-ASLant](https://www.github.com/tauri-apps/tray-icon/../../Y-ASLant)) On Windows, preserve tray icon visibility on Explorer restart so a hidden tray icon won't become visible.
+
+## \[0.24.0]
+
+- [`19bcab3`](https://www.github.com/tauri-apps/tray-icon/commit/19bcab382753cbbb883b7d6ae96d07111fc73e67) ([#305](https://www.github.com/tauri-apps/tray-icon/pull/305) by [@expenses](https://www.github.com/tauri-apps/tray-icon/../../expenses)) Make gtk an optional feature (enabled by default)
+
+## \[0.23.1]
+
+- [`7e5953c`](https://www.github.com/tauri-apps/tray-icon/commit/7e5953c227065f92dc3113268c86d6d0f05739a4) ([#311](https://www.github.com/tauri-apps/tray-icon/pull/311) by [@Fullzoon](https://www.github.com/tauri-apps/tray-icon/../../Fullzoon)) Fixed a Windows tray menu issue reported in #303 where the context menu could appear behind the taskbar after launching from the Start Menu by aligning the tray menu handling with the expected shell behavior, including showing the right-click menu on button release and posting `WM_NULL` after `TrackPopupMenu`.
+
+## \[0.23.0]
+
+- [`b74676a`](https://www.github.com/tauri-apps/tray-icon/commit/b74676a487cd74d1cf12b2d355a91473ac476369) ([#312](https://www.github.com/tauri-apps/tray-icon/pull/312) by [@lucasfernog](https://www.github.com/tauri-apps/tray-icon/../../lucasfernog)) Updated `muda` to 0.19.
+
+## \[0.22.2]
+
+- [`215e972`](https://www.github.com/tauri-apps/tray-icon/commit/215e97221e3a9e9cbc71b29c10bcfb234e1cc022) ([#262](https://www.github.com/tauri-apps/tray-icon/pull/262) by [@renovate](https://www.github.com/tauri-apps/tray-icon/../../renovate)) Relaxed `windows-sys` dependency to `>=0.60, <=0.61` instead of `0.60`
+
+## \[0.22.1]
+
+- [`eabe0f4`](https://www.github.com/tauri-apps/tray-icon/commit/eabe0f48f89c3df1cde48e8111d46bd9fec1ca30) ([#306](https://www.github.com/tauri-apps/tray-icon/pull/306) by [@Legend-Master](https://www.github.com/tauri-apps/tray-icon/../../Legend-Master)) Fix tray icon gets blurry after changing dpi on Windows
+
+## \[0.22.0]
+
+- [`f912921`](https://www.github.com/tauri-apps/tray-icon/commit/f912921a56584251dc0b5670b5281cbf7e4106b0) ([#294](https://www.github.com/tauri-apps/tray-icon/pull/294) by [@felipecrs](https://www.github.com/tauri-apps/tray-icon/../../felipecrs)) Added `with_menu_on_right_click` builder method, `set_show_menu_on_right_click` to control whether the context menu is shown on right click (analogous to the existing left click option), and `show_menu()` to programmatically display the tray menu.
+
+  Together these enable dynamic menu workflows where the menu content is updated before being shown, for example by disabling automatic right-click menu, listening for the click event, updating items, and then calling `show_menu()`.
+- [`0a5835b`](https://www.github.com/tauri-apps/tray-icon/commit/0a5835b0e6828e37a1f781de9c2d671ae7a939e6) ([#295](https://www.github.com/tauri-apps/tray-icon/pull/295) by [@thief-sty](https://www.github.com/tauri-apps/tray-icon/../../thief-sty)) Update png dependency version to 0.18.
+
+  This avoids duplicated dependencies in downstream crates.
+- [`0a5835b`](https://www.github.com/tauri-apps/tray-icon/commit/0a5835b0e6828e37a1f781de9c2d671ae7a939e6) ([#295](https://www.github.com/tauri-apps/tray-icon/pull/295) by [@thief-sty](https://www.github.com/tauri-apps/tray-icon/../../thief-sty)) Update rust version to 1.73.
+
 ## \[0.21.3]
 
 - [`d3c2468`](https://www.github.com/tauri-apps/tray-icon/commit/d3c24683fd63d197fa064bfbf205ad2fb464e338) ([#293](https://www.github.com/tauri-apps/tray-icon/pull/293) by [@Slinetrac](https://www.github.com/tauri-apps/tray-icon/../../Slinetrac)) Handle Windows tray icon creation when the taskbar is not ready by keeping the message window alive and re-registering on TaskbarCreated.

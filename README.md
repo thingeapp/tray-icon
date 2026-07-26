@@ -4,11 +4,12 @@ tray-icon lets you create tray icons for desktop applications.
 
 - Windows
 - macOS
-- Linux
+- Linux (ksni by default; gtk with the `appindicator` feature)
+- FreeBSD (gtk only)
 
 ## Platform-specific notes:
 
-- On Windows and Linux, an event loop must be running on the thread, on Windows, a win32 event loop and on Linux, a gtk event loop. It doesn't need to be the main thread but you have to create the tray icon on the same thread as the event loop.
+- On Windows and Linux or FreeBSD, an event loop must be running on the thread, on Windows, a win32 event loop and on Linux or FreeBSD, a gtk event loop. It doesn't need to be the main thread but you have to create the tray icon on the same thread as the event loop.
 - On macOS, an event loop must be running on the main thread so you also need to create the tray icon on the main thread.
 
 ## Cargo Features
@@ -31,6 +32,14 @@ pacman -S gtk3 libappindicator-gtk3 # or `libayatana-appindicator` and optionall
 
 ```sh
 sudo apt install libgtk-3-dev libappindicator3-dev # or `libayatana-appindicator3-dev` and optionally `libdbus-1-dev`
+```
+
+## Dependencies in FreeBSD
+
+Install this dependencies in order to compile `tray-icon`. Instructions using `pkg`:
+
+```sh
+pkg install -y rust glib pkgconf gtk3
 ```
 
 ## Examples

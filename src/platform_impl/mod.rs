@@ -5,7 +5,13 @@
 #[cfg(target_os = "windows")]
 #[path = "windows/mod.rs"]
 mod platform;
-#[cfg(all(target_os = "linux", not(feature = "linux-ksni")))]
+#[cfg(any(
+    all(target_os = "linux", not(feature = "linux-ksni")),
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+))]
 #[path = "gtk/mod.rs"]
 mod platform;
 #[cfg(all(target_os = "linux", feature = "linux-ksni"))]

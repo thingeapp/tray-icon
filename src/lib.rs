@@ -192,6 +192,13 @@ pub struct TrayIconAttributes {
     /// - **Linux:** Unsupported.
     pub menu_on_left_click: bool,
 
+    /// Whether to show the tray menu on right click or not, default is `true`.
+    ///
+    /// ## Platform-specific:
+    ///
+    /// - **Linux:** Unsupported.
+    pub menu_on_right_click: bool,
+
     /// Tray icon title.
     ///
     /// ## Platform-specific
@@ -216,6 +223,7 @@ impl Default for TrayIconAttributes {
             temp_dir_path: None,
             icon_is_template: false,
             menu_on_left_click: true,
+            menu_on_right_click: true,
             title: None,
         }
     }
@@ -260,8 +268,8 @@ impl TrayIconBuilder {
     /// ## Platform-specific:
     ///
     /// - **Linux:** Sometimes the icon won't be visible unless a menu is set.
-    ///     Setting an empty [`Menu`](crate::menu::Menu) is enough.
-    ///     Works with feature `linux-ksni`.
+    ///   Setting an empty [`Menu`](crate::menu::Menu) is enough.
+    ///   Works with feature `linux-ksni`.
     pub fn with_icon(mut self, icon: Icon) -> Self {
         self.attrs.icon = Some(icon);
         self
@@ -312,6 +320,16 @@ impl TrayIconBuilder {
     /// - **Linux:** Unsupported.
     pub fn with_menu_on_left_click(mut self, enable: bool) -> Self {
         self.attrs.menu_on_left_click = enable;
+        self
+    }
+
+    /// Whether to show the tray menu on right click or not, default is `true`.
+    ///
+    /// ## Platform-specific:
+    ///
+    /// - **Linux:** Unsupported.
+    pub fn with_menu_on_right_click(mut self, enable: bool) -> Self {
+        self.attrs.menu_on_right_click = enable;
         self
     }
 
@@ -373,8 +391,8 @@ impl TrayIcon {
     /// ## Platform-specific:
     ///
     /// - **Linux:** Sometimes the icon won't be visible unless a menu is set.
-    ///     Setting an empty [`Menu`](crate::menu::Menu) is enough.
-    ///     Works with feature `linux-ksni`.
+    ///   Setting an empty [`Menu`](crate::menu::Menu) is enough.
+    ///   Works with feature `linux-ksni`.
     pub fn set_icon(&self, icon: Option<Icon>) -> Result<()> {
         self.tray.borrow_mut().set_icon(icon)
     }
@@ -456,6 +474,31 @@ impl TrayIcon {
         let _ = enable;
     }
 
+    /// Disable or enable showing the tray menu on right click.
+    ///
+    /// ## Platform-specific:
+    ///
+    /// - **Linux:** Unsupported.
+    pub fn set_show_menu_on_right_click(&self, enable: bool) {
+        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        self.tray.borrow_mut().set_show_menu_on_right_click(enable);
+        #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+        let _ = enable;
+    }
+
+    /// Manually show the tray menu at the current cursor position.
+    ///
+    /// This is useful when you want to control when the menu is displayed,
+    /// for example after updating menu items dynamically.
+    ///
+    /// ## Platform-specific:
+    ///
+    /// - **Linux:** Unsupported.
+    pub fn show_menu(&self) {
+        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        self.tray.borrow().show_menu();
+    }
+
     /// Get tray icon rect.
     ///
     /// ## Platform-specific:
@@ -488,7 +531,11 @@ impl TrayIcon {
     /// # Safety
     ///
     /// The returned pointer is valid as long as the `TrayIcon` is.
-    #[cfg(all(target_os = "linux", feature = "appindicator", not(feature = "linux-ksni")))]
+    #[cfg(all(
+        target_os = "linux",
+        feature = "appindicator",
+        not(feature = "linux-ksni")
+    ))]
     pub unsafe fn app_indicator(&self) -> *const libappindicator::AppIndicator {
         self.tray.borrow().app_indicator() as *const _
     }
